@@ -1,4 +1,3 @@
-%% Task 3
 clc
 clear all
 close all
