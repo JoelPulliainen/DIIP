@@ -106,49 +106,7 @@ function pred = coin_counter(diameters)
 end
 
 % 
-function [mu_bias,mu_dark,norm_flat] = db_calibration()
-    bias1 = imread("_DSC1722.JPG");
-    bias2 = imread("_DSC1723.JPG");
-    bias3 = imread("_DSC1724.JPG");
-    bias4 = imread("_DSC1725.JPG");
-    bias5 = imread("_DSC1726.JPG");
-    dark1 = imread("_DSC1762.JPG");
-    dark2 = imread("_DSC1763.JPG");
-    dark3 = imread("_DSC1764.JPG");
-    dark4 = imread("_DSC1765.JPG");
-    dark5 = imread("_DSC1766.JPG");
-    flat1 = imread("_DSC1767.JPG");
-    flat2 = imread("_DSC1768.JPG");
-    flat3 = imread("_DSC1769.JPG");
-    flat4 = imread("_DSC1770.JPG");
-    flat5 = imread("_DSC1771.JPG");
-    
-    % Calculate mean image of bias images
-    mu_bias = (bias1+bias2+bias3+bias4+bias5)./5;
-    %mu_bias = mean(mu_bias(:));
-    %mu_bias = mean(bias4(:));
-    % Calculate mean image of dark images
-    mu_dark = ((dark1-mu_bias) + (dark2-mu_bias) + (dark3-mu_bias) + (dark4-mu_bias) + (dark5-mu_bias))./5;
-    %mu_dark = (dark1 + dark2+dark3+ dark4 + dark5)./5;
-    %mu_dark = mean(mu_dark(:));
-    %mu_dark = mean(dark4(:));
-    %flat = double(flat1) + double(flat2) + double(flat3)+ double(flat4)+ double(flat5);
-    %flat = (double(flat1)-mu_bias-mu_dark) + (double(flat2)-mu_bias-mu_dark) + (double(flat3)-mu_bias-mu_dark) + (double(flat4)-mu_bias-mu_dark) + (double(flat5)-mu_bias-mu_dark)
-   flatt1 = flat1(:,:,1);
-%    flatt2 = flat2(:,:,1);
-%    flatt3 = flat3(:,:,1);
-%    flatt4 = flat4(:,:,1);
-%    flatt5 = flat5(:,:,1);
-   mub = mu_bias(:,:,1);
-   mud = mu_dark(:,:,1);
-   %flat = (flat1-mu_bias-mu_dark) + (flat2-mu_bias-mu_dark) + (flat3-mu_bias-mu_dark) + (flat4-mu_bias-mu_dark) + (flat5-mu_bias-mu_dark);
-   flat = double(flat1-mu_bias-mu_dark);
-%     flat = flat(:);
-%     flat = normalize(flat,'range',[0.5 1.5]);
-%     norm_flat = reshape(flat, 2592, 3872,3);
-     norm_flat = uint8(double(flat)./double(max(flat(:))));
-    orm_flat = norm_flat(:,:,1);
-end
+
 
 
 
