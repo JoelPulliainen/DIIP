@@ -131,15 +131,18 @@ function calibrated_image = calibration(measurement,bias,dark,flat)
     flat1 = flat(:,:,1);
     flat2 = flat(:,:,2);
     flat3 = flat(:,:,3);
-
+    
+    flat1 = flat1(:);
     flat1 = normalize(flat1,'range',[0.5 1.5]);
     flat1 = reshape(flat1, 2592, 3872);
     flat(:,:,1) = uint8(flat1);
 
+    flat2 = flat2(:);
     flat2 = normalize(flat2,'range',[0.5 1.5]);
     flat2 = reshape(flat2, 2592, 3872);
     flat(:,:,2) = uint8(flat2);
 
+    flat3 = flat3(:);
     flat3 = normalize(flat3,'range',[0.5 1.5]);
     flat3 = reshape(flat3, 2592, 3872);
     flat(:,:,3) = uint8(flat3);
