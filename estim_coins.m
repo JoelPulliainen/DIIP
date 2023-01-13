@@ -206,7 +206,4 @@ function calibrated_image = calibration(measurement,bias,dark,flat)
     figure("name","segmented image poop"),imshow(calibrated_image)
     sad = 23
 
-
-    %calibrated_image = (measurement - bias - dark) ./ flat;
-
 end
