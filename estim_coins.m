@@ -204,6 +204,5 @@ function calibrated_image = calibration(measurement,bias,dark,flat)
     calibrated_image = uint8(calibrated_image);
     
     figure("name","segmented image poop"),imshow(calibrated_image)
-    sad = 23
 
 end
