@@ -1,25 +1,4 @@
-clc
-clear all
-close all
-
-coins = cell(1,12)
-[mean_bias,mean_dark,norm_flat] = Imean();
-x = linspace(72,83,12);
-for i = x
-    F = sprintf('_DSC17%d.JPG',i);
-    measurement = imread(F);
-    coins{i-71} = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
-end
-% measurement = imread("_DSC1775.JPG");
-% coins1 = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
-
-% % measurement = imread("_DSC1777.JPG");
-% % coins2 = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
-
-% measurement = imread("_DSC1781.JPG");
-% coins2 = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
-
-function coins = estim_coins1(measurement, mu_bias, mu_dark, norm_flat)
+function coins = estim_coins(measurement, mu_bias, mu_dark, norm_flat)
     figure("Name","refrence"),imshow(measurement);
     
     % Calibrate image intesity
