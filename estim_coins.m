@@ -1,11 +1,11 @@
-function coins = estim_coins(measurement, mu_bias, mu_dark, norm_flat)
+function coins = estim_coins(measurement, mu_bias, mu_dark, flat)
     figure("Name","refrence"),imshow(measurement);
     
     % Calibrate image intesity
-    I_calibrated = calibration(measurement,mu_bias,mu_dark,norm_flat);
+    I_calibrated = calibration(measurement,mu_bias,mu_dark,flat);
 
     % Calibrate image pixel size using checkerboard
-    [pixel_size_x,pixel_size_y] = geo_calibration(norm_flat);
+    [pixel_size_x,pixel_size_y] = geo_calibration(flat);
 
     % Remove checkerboard from the image
     I_calibrated = remove_checkerboard(I_calibrated);
@@ -156,7 +156,7 @@ function calibrated_image = calibration(measurement,bias,dark,flat)
     % Perform intesity calibration for the image using dark bias and
     % flatfield images
 
-    dark = dark-bias;
+    %dark = dark-bias;
     flat = flat-bias-dark;
     flatfield = uint8(double(flat)./double(max(flat(:))));
     flat = uint8(double(flat)./double(max(flat(:))));
