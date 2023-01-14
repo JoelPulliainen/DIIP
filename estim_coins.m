@@ -8,7 +8,6 @@ x = linspace(72,83,12);
 for i = x
     F = sprintf('_DSC17%d.JPG',i);
     measurement = imread(F);
-    imtool(measurement)
     coins{i-71} = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
 end
 % measurement = imread("_DSC1775.JPG");
