@@ -2,19 +2,18 @@ clc
 clear all
 close all
 
-
 coins = cell(1,12)
 [mean_bias,mean_dark,norm_flat] = Imean();
 x = linspace(72,83,12);
 for i = x
     F = sprintf('_DSC17%d.JPG',i);
     measurement = imread(F);
-    %imtool(measurement)
+    imtool(measurement)
     coins{i-71} = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
 end
 % measurement = imread("_DSC1775.JPG");
 % coins1 = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
-% 
+
 % % measurement = imread("_DSC1777.JPG");
 % % coins2 = estim_coins1(measurement,mean_bias,mean_dark,norm_flat)
 
@@ -24,58 +23,54 @@ end
 function coins = estim_coins1(measurement, mu_bias, mu_dark, norm_flat)
     figure("Name","refrence"),imshow(measurement);
     
+    % Calibrate image intesity
     I_calibrated = calibration(measurement,mu_bias,mu_dark,norm_flat);
-    diff = I_calibrated-measurement;
-    figure("Name","Calibrated"),imshow(I_calibrated);
 
-    I_calibrated = db_calibration(I_calibrated);
-    [pixel_size_x,pixel_size_y] = size_calc(norm_flat)
+    % Calibrate image pixel size using checkerboard
+    [pixel_size_x,pixel_size_y] = geo_calibration(norm_flat);
 
-    figure("name","segmens32dds"); imshow(I_calibrated);
+    % Remove checkerboard from the image
+    I_calibrated = remove_checkerboard(I_calibrated);
     
-
-    %I_calibrated = imadjust(I_calibrated,[.2 .2 .2; .5 .6 .8],[]);
-    
+    % Make the image gray
     I_calibrated = rgb2gray(I_calibrated);
-    
-    figure("name","segmensd76ds"); imshow(I_calibrated);
 
+    % Plot gray image
+    figure("name","Gray image"); imshow(I_calibrated);
 
+    % Threshold the image, binarize and imcomplement, then plot
     threshold = graythresh(I_calibrated);
     BW = imbinarize(I_calibrated,threshold);
-    %BW = imfill(BW,"holes");
     BW = imcomplement(BW); 
+
     figure("name","segmented image")
     imshow(BW)
-    
    
     % Create average filter
     average_filter = fspecial('average',12);
     
-    % Filter for sp noise 1 and plot
+    % Filter image
     BW= imfilter(BW,average_filter);
+
+    % Fill holes in the image
     BW = imfill(BW,"holes");
 
+    % Calculate statistics of the image regions
     %stats = regionprops('table',BW,'Centroid','Area','Perimeter','MajorAxisLength','MinorAxisLength','EquivDiameter');
     stats = regionprops('table',BW,'all');
     centers = stats.Centroid;
-    
-    [largest,Idx] = max(stats.Area);
-    
+
+    % Find regions that are big enough to be coins
     areas = stats.Area;
-    peri = stats.Perimeter;
-    eqdia = stats.EquivDiameter;
-    ans = find(areas>50000);
+    idx = find(areas>50000);
     centers1 = centers;
-    centers = centers(ans,:);
-    areas = areas(ans);
-    peri = peri(ans);
-    eqdia = eqdia(ans);
-    areas = areas;
+    centers = centers(idx,:);
+
     
     diameters = mean([stats.MajorAxisLength stats.MinorAxisLength],2);
-    diameters = diameters(ans);
+    diameters = diameters(idx);
     
+    % Calculate size in mm
     dia = diameters./pixel_size_x;
     
     figure("name","segmented image with centers marked")
@@ -89,17 +84,18 @@ function coins = estim_coins1(measurement, mu_bias, mu_dark, norm_flat)
 
 end
 function pred = coin_counter(diameters)
+    % Coint coins based on diameters
     pred = zeros(1,6);
     for i = 1:length(diameters)
         if diameters(i) >= 25
             pred(1) = pred(1)+1;
-        elseif 24.1 > diameters(i) & diameters(i) > 22.8
+        elseif 24 > diameters(i) && diameters(i) > 22.8
             pred(2) = pred(2)+1;
-        elseif 25 > diameters(i) & diameters(i) > 24.1
+        elseif 25 > diameters(i) && diameters(i) > 24
             pred(3) = pred(3)+1;
-        elseif 22.8 > diameters(i) & diameters(i) > 21.8
+        elseif 22.8 > diameters(i) && diameters(i) > 21.8
             pred(4) = pred(4)+1;
-        elseif 20.5 > diameters(i) & diameters(i) > 19
+        elseif 20.5 > diameters(i) && diameters(i) > 19
             pred(5) = pred(5)+1;
         else 
             pred(6) = pred(6)+1;
@@ -107,17 +103,24 @@ function pred = coin_counter(diameters)
     end
 end
 
-% 
-function i_cal_no_chec = db_calibration(image)
+
+function image_wo_checkerboard = remove_checkerboard(image)
+    % Remove checkerboard from the image
+
+    % Create adjusted mean values for the replacement color
     mu1 = mean2(image(:,:,1))+20;
     mu2 = mean2(image(:,:,2))+25;
     mu3 = mean2(image(:,:,3))+35;
-    for i = 1:1700% 1700
-        for j = 2249:size(image,2) % 2249
+
+    % Scan over the top right corner
+    for i = 1:1700
+        for j = 2249:size(image,2)
             if image(i,j,1) < 120 && image(i,j,2) < 120 && image(i,j,3) < 120
                 diff_rg = abs(image(i,j,1) - image(i,j,2));
                 diff_rb = abs(image(i,j,1) - image(i,j,3));
                 diff_gb = abs(image(i,j,2) - image(i,j,3));
+                % Check if the RGB difference is small enough -> pixel is
+                % black
                 if diff_rg < 20 && diff_rb < 40 && diff_gb < 20
                     image(i,j,1) = mu1;
                     image(i,j,2) = mu2;
@@ -126,42 +129,21 @@ function i_cal_no_chec = db_calibration(image)
             end
         end
     end
-    %imtool(image)
-    i_cal_no_chec = image;
-    figure("name","Checkerboard")
-    imshow(i_cal_no_chec)
+    
+    image_wo_checkerboard = image;
+    figure("name","Image without checkerboard")
+    imshow(image_wo_checkerboard)
 end
 
-function i_calibrated = remove_shadows(image)
-
-    for i = 1:size(image,1)
-        for j = 1:size(image,2) % 2249
-            if image(i,j,1) < 10 && image(i,j,2) < 10 && image(i,j,3) < 10
-                diff_rg = abs(image(i,j,1) - image(i,j,2));
-                diff_rb = abs(image(i,j,1) - image(i,j,3));
-                diff_gb = abs(image(i,j,2) - image(i,j,3));
-                if diff_rg < 20 && diff_rb < 40 && diff_gb < 20
-                    image(i,j,1) = 255;
-                    image(i,j,2) = 200;
-                    image(i,j,3) = 150;
-                end
-            end
-        end
-    end
-    %imtool(image)
-    i_calibrated = image;
-    figure("name","Checkerboard")
-    imshow(i_calibrated)
-end
-
-function [pixel_size_x,pixel_size_y] = size_calc(image)
+function [pixel_size_x,pixel_size_y] = geo_calibration(image)
     %Calculate the pixel to mm ratio
     [imagePoints,boardSize] = detectCheckerboardPoints(image);
     dist_y = sqrt(sum((imagePoints(2,:)-imagePoints(1,:)).^2));
     dist_x = sqrt(sum((imagePoints(7,:)-imagePoints(1,:)).^2));
     pixel_size_y = dist_y/12.5;
     pixel_size_x = dist_x/12.5;
-    figure("name","Checkerboard")
+
+    figure("name","Checkerboard points")
     imshow(image)
     hold on
     plot(imagePoints(:,1),imagePoints(:,2),'ro')
@@ -169,7 +151,7 @@ function [pixel_size_x,pixel_size_y] = size_calc(image)
 
 end
 
-function [mean_bias,mean_dark,norm_flat] = Imean()
+function [mean_bias,mean_dark,flat] = Imean()
 
     bias1 = imread("_DSC1722.JPG");
     bias2 = imread("_DSC1723.JPG");
@@ -188,21 +170,27 @@ function [mean_bias,mean_dark,norm_flat] = Imean()
     flat5 = imread("_DSC1771.JPG");
 
     mean_bias = (bias1 + bias2 + bias3 + bias4 + bias5)./5;
-    mean_dark = ((dark1-mean_bias) + (dark2-mean_bias) + (dark3-mean_bias) + (dark4-mean_bias) + (dark5-mean_bias))./5;
-    norm_flat = ((flat1-mean_dark-mean_bias) + (flat2-mean_dark-mean_bias) + (flat3-mean_dark-mean_bias) + (flat4-mean_dark-mean_bias) + (flat5-mean_dark-mean_bias));
+    mean_dark = (dark1 + dark2 + dark3 + dark4 + dark5)./5;
+    flat = flat1 + flat2 + flat3 + flat4 + flat5;
 end
 
 function calibrated_image = calibration(measurement,bias,dark,flat)
+    % Perform intesity calibration for the image using dark bias and
+    % flatfield images
 
+    dark = dark-bias;
+    flat = flat-bias-dark;
     flatfield = uint8(double(flat)./double(max(flat(:))));
-    flat = double(flat)./double(max(flat(:)));
-    flat1 = flat(:,:,1);
+    flat = uint8(double(flat)./double(max(flat(:))));
+
+    % Create mask to not remove the coins on top of the checkerboard
     mask = imbinarize(flatfield);
-    mask1 = mask(:,:,1);
-    calibrated_image = double(measurement - bias  - dark ) ./ flat;
+
+    calibrated_image = (measurement - bias  - dark ) ./ flat;
     calibrated_image(~mask) = measurement(~mask);
     calibrated_image = uint8(calibrated_image);
     
-    figure("name","segmented image poop"),imshow(calibrated_image)
+    figure("name","Calibrated image"),imshow(calibrated_image)
+
 
 end
