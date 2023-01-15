@@ -1,15 +1,26 @@
+% Use script to test estim_coins function
+% If calculation of mean images is not needed Imean function call can be
+% commented out
+
+
 clc
 clear all
 close all
 
-coins = cell(1,12)
-[mean_bias,mean_dark,norm_flat] = Imean();
+
+%calculate means
+[mean_bias,mean_dark,flat] = Imean();
+
+% Test for whole dataset
+coins = cell(1,12);
 x = linspace(72,83,12);
 for i = x
     F = sprintf('_DSC17%d.JPG',i);
     measurement = imread(F);
-    coins{i-71} = estim_coins(measurement,mean_bias,mean_dark,norm_flat)
+    coins{i-71} = estim_coins(measurement,mean_bias,mean_dark,flat)
 end
+
+% Test for singel
 % measurement = imread("_DSC1775.JPG");
 % coins1 = estim_coins(measurement,mean_bias,mean_dark,norm_flat)
 
@@ -39,5 +50,5 @@ function [mean_bias,mean_dark,flat] = Imean()
 
     mean_bias = (bias1 + bias2 + bias3 + bias4 + bias5)./5;
     mean_dark = (dark1 + dark2 + dark3 + dark4 + dark5)./5;
-    flat = flat1 + flat2 + flat3 + flat4 + flat5;
+    flat = (flat1 + flat2 + flat3 + flat4 + flat5)./5;
 end

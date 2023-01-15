@@ -9,7 +9,7 @@ function coins = estim_coins(measurement, bias, dark, flat)
 % corresponding to the number of 5 cent-coins in the image and the last element corresponding to
 % the number of 2 euro-coins in the image
 
-    %figure("Name","refrence"),imshow(measurement);
+    figure("Name","refrence"),imshow(measurement);
     
     % Calibrate image intesity
     I_calibrated = calibration(measurement,bias,dark,flat);
@@ -122,8 +122,8 @@ function image_wo_checkerboard = remove_checkerboard(image)
     end
     
     image_wo_checkerboard = image;
-    % figure("name","Image without checkerboard")
-    % imshow(image_wo_checkerboard)
+    figure("name","Image without checkerboard")
+    imshow(image_wo_checkerboard)
 end
 
 function [pixel_size_x,pixel_size_y] = geo_calibration(image)
@@ -144,11 +144,34 @@ function [pixel_size_x,pixel_size_y] = geo_calibration(image)
 
 end
 
+function [mean_bias,mean_dark,flat] = Imean()
+
+    bias1 = imread("_DSC1722.JPG");
+    bias2 = imread("_DSC1723.JPG");
+    bias3 = imread("_DSC1724.JPG");
+    bias4 = imread("_DSC1725.JPG");
+    bias5 = imread("_DSC1726.JPG");
+    dark1 = imread("_DSC1762.JPG");
+    dark2 = imread("_DSC1763.JPG");
+    dark3 = imread("_DSC1764.JPG");
+    dark4 = imread("_DSC1765.JPG");
+    dark5 = imread("_DSC1766.JPG");
+    flat1 = imread("_DSC1767.JPG");
+    flat2 = imread("_DSC1768.JPG");
+    flat3 = imread("_DSC1769.JPG");
+    flat4 = imread("_DSC1770.JPG");
+    flat5 = imread("_DSC1771.JPG");
+
+    mean_bias = (bias1 + bias2 + bias3 + bias4 + bias5)./5;
+    mean_dark = (dark1 + dark2 + dark3 + dark4 + dark5)./5;
+    flat = flat1 + flat2 + flat3 + flat4 + flat5;
+end
+
 function calibrated_image = calibration(measurement,bias,dark,flat)
     % Perform intesity calibration for the image using dark bias and
     % flatfield images
 
-    dark = dark-bias;
+    %dark = dark-bias;
     flat = flat-bias-dark;
     flatfield = uint8(double(flat)./double(max(flat(:))));
     flat = uint8(double(flat)./double(max(flat(:))));
