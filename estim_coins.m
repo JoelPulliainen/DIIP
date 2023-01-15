@@ -8,6 +8,7 @@ function coins = estim_coins(measurement, bias, dark, flat)
 % Output is s a six-element vector with the first element
 % corresponding to the number of 5 cent-coins in the image and the last element corresponding to
 % the number of 2 euro-coins in the image
+% Additional figures for visualising the process are included as comments
 
     %figure("Name","refrence"),imshow(measurement);
     
@@ -136,11 +137,11 @@ function [pixel_size_x,pixel_size_y] = geo_calibration(image)
     pixel_size_y = dist_y/12.5;
     pixel_size_x = dist_x/12.5;
 
-    % figure("name","Checkerboard points")
-    % imshow(image)
-    % hold on
-    % plot(imagePoints(:,1),imagePoints(:,2),'ro')
-    % hold off
+%     figure("name","Checkerboard points")
+%     imshow(image)
+%     hold on
+%     plot(imagePoints(:,1),imagePoints(:,2),'ro')
+%     hold off
 
 end
 

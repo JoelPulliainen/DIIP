@@ -49,5 +49,5 @@ function [mean_bias,mean_dark,flat] = Imean()
 
     mean_bias = (bias1 + bias2 + bias3 + bias4 + bias5)./5;
     mean_dark = (dark1 + dark2 + dark3 + dark4 + dark5)./5;
-    flat = (flat1 + flat2 + flat3 + flat4 + flat5)./5;
+    flat = (flat1 + flat2 + flat3 + flat4 + flat5);
 end
